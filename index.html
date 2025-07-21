@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduBoard Pro - Pizarra Educativa Interactiva</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/fabric@5.3.0/dist/fabric.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/styles.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            200: '#bfdbfe',
+                            300: '#93c5fd',
+                            400: '#60a5fa',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                        },
+                        secondary: {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            200: '#e2e8f0',
+                            300: '#cbd5e1',
+                            400: '#94a3b8',
+                            500: '#64748b',
+                            600: '#475569',
+                            700: '#334155',
+                            800: '#1e293b',
+                            900: '#0f172a',
+                        },
+                        accent: {
+                            purple: '#8b5cf6',
+                            green: '#10b981',
+                            orange: '#f59e0b',
+                            pink: '#ec4899',
+                            indigo: '#6366f1',
+                        }
+                    },
+                    fontFamily: {
+                        'display': ['Inter', 'system-ui', 'sans-serif'],
+                        'body': ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-out',
+                        'slide-up': 'slideUp 0.3s ease-out',
+                        'slide-down': 'slideDown 0.3s ease-out',
+                        'scale-in': 'scaleIn 0.2s ease-out',
+                        'bounce-subtle': 'bounceSubtle 0.6s ease-out',
+                        'pulse-soft': 'pulseSoft 2s infinite',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gradient-to-br from-secondary-50 via-white to-primary-50 min-h-screen overflow-hidden font-body">
+    <!-- Navigation Header -->
+    <nav class="bg-white/80 backdrop-blur-xl border-b border-secondary-200/50 shadow-sm sticky top-0 z-50">
+        <div class="px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16 lg:h-18">
+                <!-- Logo & Brand -->
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="relative">
+                            <div class="w-10 h-10 lg:w-12 lg:h-12 bg-gradient-to-r from-primary-600 via-accent-purple to-primary-700 rounded-2xl flex items-center justify-center shadow-lg">
+                                <i class="fas fa-chalkboard-teacher text-white text-lg lg:text-xl"></i>
+                            </div>
+                            <div class="absolute -top-1 -right-1 w-4 h-4 bg-accent-green rounded-full animate-pulse-soft"></div>
+                        </div>
+                        <div>
+                            <h1 class="text-xl lg:text-2xl font-bold bg-gradient-to-r from-secondary-900 to-primary-700 bg-clip-text text-transparent">
+                                EduBoard Pro
+                            </h1>
+                            <p class="text-xs lg:text-sm text-secondary-500 font-medium">Pizarra Educativa Inteligente</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Desktop Actions -->
+                    <div class="hidden lg:flex items-center space-x-2 ml-8">
+                        <button id="newBoard" class="action-btn primary">
+                            <i class="fas fa-plus"></i>
+                            <span>Nuevo</span>
+                        </button>
+                        <button id="saveBoard" class="action-btn secondary">
+                            <i class="fas fa-save"></i>
+                            <span>Guardar</span>
+                        </button>
+                        <button id="loadBoard" class="action-btn secondary">
+                            <i class="fas fa-folder-open"></i>
+                            <span>Abrir</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <button id="mobileMenuBtn" class="lg:hidden p-3 rounded-xl hover:bg-secondary-100 transition-all duration-200">
+                    <i class="fas fa-bars text-secondary-600 text-lg"></i>
+                </button>
+
+                <!-- Desktop Actions Right -->
+                <div class="hidden lg:flex items-center space-x-3">
+                    <div class="flex items-center space-x-2 bg-secondary-100/50 rounded-xl p-1">
+                        <button id="undoBtn" class="icon-btn" title="Deshacer (Ctrl+Z)">
+                            <i class="fas fa-undo"></i>
+                        </button>
+                        <button id="redoBtn" class="icon-btn" title="Rehacer (Ctrl+Y)">
+                            <i class="fas fa-redo"></i>
+                        </button>
+                    </div>
+                    <button id="clearBoard" class="action-btn danger">
+                        <i class="fas fa-trash-alt"></i>
+                        <span>Limpiar</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu Overlay -->
+    <div id="mobileMenu" class="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 hidden lg:hidden">
+        <div class="fixed inset-y-0 left-0 w-80 bg-white shadow-2xl transform -translate-x-full transition-transform duration-300 ease-out" id="mobileMenuPanel">
+            <div class="p-6 border-b border-secondary-200">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-xl font-bold text-secondary-900">Herramientas</h2>
+                    <button id="closeMobileMenu" class="p-2 rounded-lg hover:bg-secondary-100 transition-colors">
+                        <i class="fas fa-times text-secondary-600"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="p-4 space-y-6 overflow-y-auto h-full pb-20">
+                <!-- Mobile menu content will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <div class="flex h-screen">
+        <!-- Desktop Sidebar -->
+        <div id="desktopSidebar" class="hidden lg:block w-80 xl:w-96 bg-white/70 backdrop-blur-xl border-r border-secondary-200/50 shadow-sm overflow-y-auto">
+            <div id="toolsContainer" class="p-6 space-y-8">
+                <!-- Tools will be populated by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Main Canvas Area -->
+        <div class="flex-1 relative bg-gradient-to-br from-white via-secondary-50/30 to-primary-50/20">
+            <!-- Canvas Container -->
+            <div id="canvasContainer" class="w-full h-full relative">
+                <canvas id="drawingCanvas" class="absolute inset-0 cursor-crosshair rounded-lg"></canvas>
+                
+                <!-- Canvas Overlay Elements -->
+                <div class="absolute inset-0 pointer-events-none">
+                    <!-- Grid Pattern (Optional) -->
+                    <div class="absolute inset-0 opacity-5" style="background-image: radial-gradient(circle, #64748b 1px, transparent 1px); background-size: 20px 20px;"></div>
+                </div>
+            </div>
+
+            <!-- Floating Mobile Toolbar -->
+            <div id="mobileToolbar" class="lg:hidden fixed bottom-6 left-4 right-4 bg-white/90 backdrop-blur-xl rounded-2xl shadow-2xl border border-secondary-200/50 p-4">
+                <div class="flex justify-between items-center">
+                    <div class="flex space-x-3">
+                        <button id="mobileSelectTool" class="mobile-tool-btn active" data-tool="select" title="Seleccionar">
+                            <i class="fas fa-mouse-pointer"></i>
+                        </button>
+                        <button id="mobileDrawTool" class="mobile-tool-btn" data-tool="draw" title="Dibujar">
+                            <i class="fas fa-pen"></i>
+                        </button>
+                        <button id="mobileTextTool" class="mobile-tool-btn" data-tool="text" title="Texto">
+                            <i class="fas fa-font"></i>
+                        </button>
+                        <button id="mobileEraseTool" class="mobile-tool-btn" data-tool="erase" title="Borrar">
+                            <i class="fas fa-eraser"></i>
+                        </button>
+                    </div>
+                    <div class="flex space-x-3">
+                        <button id="mobileColorBtn" class="mobile-tool-btn special" title="Colores">
+                            <i class="fas fa-palette"></i>
+                        </button>
+                        <button id="mobileShapesBtn" class="mobile-tool-btn special" title="Más herramientas">
+                            <i class="fas fa-shapes"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Properties Panel -->
+            <div id="propertiesPanel" class="absolute top-6 right-6 bg-white/90 backdrop-blur-xl rounded-2xl shadow-2xl border border-secondary-200/50 p-6 w-80 hidden animate-slide-down">
+                <div class="flex justify-between items-center mb-4">
+                    <h4 class="font-bold text-secondary-900 flex items-center">
+                        <i class="fas fa-sliders-h text-primary-600 mr-2"></i>
+                        Propiedades
+                    </h4>
+                    <button id="closePropertiesPanel" class="p-2 rounded-lg hover:bg-secondary-100 transition-colors">
+                        <i class="fas fa-times text-secondary-500"></i>
+                    </button>
+                </div>
+                <div id="propertiesContent">
+                    <!-- Dynamic content -->
+                </div>
+            </div>
+
+            <!-- Zoom Controls -->
+            <div class="absolute bottom-6 right-6 lg:bottom-8 lg:right-8 flex flex-col space-y-2">
+                <div class="bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl border border-secondary-200/50 p-2">
+                    <button id="zoomIn" class="zoom-btn">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                    <div id="zoomLevel" class="px-3 py-2 text-sm font-bold text-secondary-700 text-center min-w-[60px]">100%</div>
+                    <button id="zoomOut" class="zoom-btn">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                    <div class="border-t border-secondary-200 my-2"></div>
+                    <button id="resetZoom" class="zoom-btn" title="Restablecer zoom">
+                        <i class="fas fa-expand-arrows-alt"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Loading Indicator -->
+            <div id="loadingIndicator" class="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center hidden">
+                <div class="text-center">
+                    <div class="relative">
+                        <div class="w-16 h-16 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin mx-auto mb-4"></div>
+                        <div class="absolute inset-0 w-16 h-16 border-4 border-transparent border-r-accent-purple rounded-full animate-spin mx-auto" style="animation-delay: -0.3s;"></div>
+                    </div>
+                    <p class="text-secondary-600 font-medium">Cargando...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Enhanced Modals -->
+    <!-- Table Creation Modal -->
+    <div id="tableModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md transform animate-scale-in">
+            <div class="p-8">
+                <div class="text-center mb-6">
+                    <div class="w-16 h-16 bg-gradient-to-r from-accent-orange to-yellow-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-table text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-secondary-900 mb-2">Crear Tabla</h3>
+                    <p class="text-secondary-600">Diseña una tabla personalizada para tu diagrama</p>
+                </div>
+                
+                <div class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-semibold text-secondary-700 mb-3">Nombre de la Tabla</label>
+                        <input type="text" id="tableName" class="modern-input" placeholder="ej: usuarios, productos...">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-secondary-700 mb-3">Filas</label>
+                            <input type="number" id="tableRows" value="3" min="1" max="10" class="modern-input">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-secondary-700 mb-3">Columnas</label>
+                            <input type="number" id="tableCols" value="3" min="1" max="8" class="modern-input">
+                        </div>
+                    </div>
+                    <div class="flex space-x-3 pt-4">
+                        <button id="cancelTable" class="flex-1 btn-secondary">Cancelar</button>
+                        <button id="createTable" class="flex-1 btn-primary">
+                            <i class="fas fa-plus mr-2"></i>
+                            Crear Tabla
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Color Picker Modal -->
+    <div id="colorModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm transform animate-scale-in">
+            <div class="p-8">
+                <div class="text-center mb-6">
+                    <div class="w-16 h-16 bg-gradient-to-r from-accent-pink to-accent-purple rounded-2xl flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-palette text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-secondary-900 mb-2">Colores</h3>
+                    <p class="text-secondary-600">Elige el color perfecto para tu creación</p>
+                </div>
+                
+                <div class="space-y-6">
+                    <div>
+                        <input type="color" id="colorPicker" value="#000000" class="w-full h-16 rounded-2xl border-4 border-secondary-200 cursor-pointer">
+                    </div>
+                    <div class="grid grid-cols-6 gap-3">
+                        <div class="color-preset-modern" data-color="#1e293b" style="background: #1e293b" title="Negro"></div>
+                        <div class="color-preset-modern" data-color="#ef4444" style="background: #ef4444" title="Rojo"></div>
+                        <div class="color-preset-modern" data-color="#10b981" style="background: #10b981" title="Verde"></div>
+                        <div class="color-preset-modern" data-color="#3b82f6" style="background: #3b82f6" title="Azul"></div>
+                        <div class="color-preset-modern" data-color="#f59e0b" style="background: #f59e0b" title="Amarillo"></div>
+                        <div class="color-preset-modern" data-color="#8b5cf6" style="background: #8b5cf6" title="Púrpura"></div>
+                        <div class="color-preset-modern" data-color="#f97316" style="background: #f97316" title="Naranja"></div>
+                        <div class="color-preset-modern" data-color="#06b6d4" style="background: #06b6d4" title="Cian"></div>
+                        <div class="color-preset-modern" data-color="#84cc16" style="background: #84cc16" title="Lima"></div>
+                        <div class="color-preset-modern" data-color="#f59e0b" style="background: #f59e0b" title="Ámbar"></div>
+                        <div class="color-preset-modern" data-color="#a855f7" style="background: #a855f7" title="Violeta"></div>
+                        <div class="color-preset-modern" data-color="#ec4899" style="background: #ec4899" title="Rosa"></div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-secondary-700 mb-3">Grosor del Pincel</label>
+                        <div class="relative">
+                            <input type="range" id="brushSize" min="1" max="20" value="3" class="modern-range">
+                            <div class="flex justify-between text-xs text-secondary-500 mt-2">
+                                <span>Fino</span>
+                                <span>Grueso</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button id="closeColorModal" class="w-full btn-primary">
+                        <i class="fas fa-check mr-2"></i>
+                        Aplicar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal (replaces alerts) -->
+    <div id="confirmModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md transform animate-scale-in">
+            <div class="p-8 text-center">
+                <div id="confirmIcon" class="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <!-- Dynamic icon -->
+                </div>
+                <h3 id="confirmTitle" class="text-2xl font-bold text-secondary-900 mb-2"></h3>
+                <p id="confirmMessage" class="text-secondary-600 mb-6"></p>
+                <div class="flex space-x-3">
+                    <button id="confirmCancel" class="flex-1 btn-secondary">Cancelar</button>
+                    <button id="confirmAction" class="flex-1 btn-primary"></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toastContainer" class="fixed top-6 right-6 z-50 space-y-3">
+        <!-- Toasts will be dynamically added here -->
+    </div>
+
+    <!-- Hidden file input -->
+    <input type="file" id="imageUpload" accept="image/*" class="hidden">
+
+    <script src="/assets/js/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,438 @@
+/* Modern Design System */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap");
+
+:root {
+  /* Color System */
+  --primary-50: #eff6ff;
+  --primary-500: #3b82f6;
+  --primary-600: #2563eb;
+  --primary-700: #1d4ed8;
+
+  --secondary-50: #f8fafc;
+  --secondary-100: #f1f5f9;
+  --secondary-200: #e2e8f0;
+  --secondary-500: #64748b;
+  --secondary-600: #475569;
+  --secondary-700: #334155;
+  --secondary-900: #0f172a;
+
+  /* Spacing System */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+
+  /* Border Radius */
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --radius-2xl: 2rem;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+* {
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--secondary-100);
+  border-radius: var(--radius-lg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--primary-400), var(--primary-600));
+  border-radius: var(--radius-lg);
+  border: 2px solid var(--secondary-100);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, var(--primary-500), var(--primary-700));
+}
+
+/* Button System */
+.action-btn {
+  @apply px-4 py-2.5 rounded-xl font-semibold text-sm transition-all duration-200 flex items-center space-x-2 shadow-sm hover:shadow-md active:scale-95;
+}
+
+.action-btn.primary {
+  @apply bg-gradient-to-r from-primary-600 to-primary-700 text-white hover:from-primary-700 hover:to-primary-800 shadow-primary-500/25;
+}
+
+.action-btn.secondary {
+  @apply bg-white text-secondary-700 border border-secondary-200 hover:bg-secondary-50 hover:border-secondary-300;
+}
+
+.action-btn.danger {
+  @apply bg-gradient-to-r from-red-500 to-red-600 text-white hover:from-red-600 hover:to-red-700 shadow-red-500/25;
+}
+
+.icon-btn {
+  @apply w-10 h-10 rounded-xl flex items-center justify-center text-secondary-600 hover:text-secondary-900 hover:bg-white transition-all duration-200 active:scale-95;
+}
+
+.btn-primary {
+  @apply bg-gradient-to-r from-primary-600 to-primary-700 text-white px-6 py-3 rounded-xl font-semibold hover:from-primary-700 hover:to-primary-800 transition-all duration-200 shadow-lg hover:shadow-xl active:scale-95 flex items-center justify-center;
+}
+
+.btn-secondary {
+  @apply bg-secondary-100 text-secondary-700 px-6 py-3 rounded-xl font-semibold hover:bg-secondary-200 transition-all duration-200 active:scale-95 flex items-center justify-center;
+}
+
+/* Tool Buttons */
+.tool-btn {
+  @apply group relative flex flex-col items-center justify-center p-4 rounded-2xl transition-all duration-300 cursor-pointer border-2 border-transparent hover:border-primary-200 bg-gradient-to-br from-white to-secondary-50/50 hover:from-primary-50 hover:to-primary-100/50 shadow-sm hover:shadow-md;
+}
+
+.tool-btn.active {
+  @apply border-primary-300 bg-gradient-to-br from-primary-50 to-primary-100 shadow-md ring-4 ring-primary-500/10;
+}
+
+.tool-btn i {
+  @apply text-xl mb-2 text-secondary-600 group-hover:text-primary-600 transition-colors duration-200;
+}
+
+.tool-btn.active i {
+  @apply text-primary-700;
+}
+
+.tool-btn span {
+  @apply text-sm font-semibold text-secondary-700 group-hover:text-primary-700 transition-colors duration-200;
+}
+
+.tool-btn.active span {
+  @apply text-primary-800;
+}
+
+/* Mobile Tool Buttons */
+.mobile-tool-btn {
+  @apply w-12 h-12 rounded-2xl flex items-center justify-center text-secondary-600 bg-gradient-to-br from-white to-secondary-50 border border-secondary-200/50 hover:border-primary-300 hover:text-primary-600 hover:bg-gradient-to-br hover:from-primary-50 hover:to-primary-100 transition-all duration-200 shadow-sm hover:shadow-md active:scale-95;
+}
+
+.mobile-tool-btn.active {
+  @apply border-primary-400 text-primary-700 bg-gradient-to-br from-primary-100 to-primary-200 shadow-md;
+}
+
+.mobile-tool-btn.special {
+  @apply bg-gradient-to-br from-accent-purple/10 to-accent-pink/10 border-accent-purple/30 text-accent-purple hover:from-accent-purple/20 hover:to-accent-pink/20;
+}
+
+/* Category Buttons */
+.category-btn {
+  @apply group relative flex flex-col items-center justify-center p-4 rounded-2xl transition-all duration-300 cursor-pointer border-2 border-transparent bg-gradient-to-br from-white to-secondary-50/50 hover:shadow-lg active:scale-95;
+}
+
+.category-btn.shapes {
+  @apply hover:border-accent-green/30 hover:from-accent-green/5 hover:to-accent-green/10;
+}
+
+.category-btn.shapes i {
+  @apply text-accent-green group-hover:scale-110 transition-transform duration-200;
+}
+
+.category-btn.network {
+  @apply hover:border-purple-300 hover:from-purple-50 hover:to-purple-100/50;
+}
+
+.category-btn.network i {
+  @apply text-purple-600 group-hover:scale-110 transition-transform duration-200;
+}
+
+.category-btn.database {
+  @apply hover:border-orange-300 hover:from-orange-50 hover:to-orange-100/50;
+}
+
+.category-btn.database i {
+  @apply text-orange-600 group-hover:scale-110 transition-transform duration-200;
+}
+
+.category-btn.web {
+  @apply hover:border-indigo-300 hover:from-indigo-50 hover:to-indigo-100/50;
+}
+
+.category-btn.web i {
+  @apply text-indigo-600 group-hover:scale-110 transition-transform duration-200;
+}
+
+.category-btn i {
+  @apply text-2xl mb-3 transition-all duration-200;
+}
+
+.category-btn span {
+  @apply text-sm font-semibold text-secondary-700 group-hover:text-secondary-900 transition-colors duration-200;
+}
+
+/* Form Elements */
+.modern-input {
+  @apply w-full px-4 py-3 bg-secondary-50 border-2 border-secondary-200 rounded-xl text-secondary-900 placeholder-secondary-500 focus:border-primary-500 focus:bg-white focus:ring-4 focus:ring-primary-500/10 transition-all duration-200 font-medium;
+}
+
+.modern-range {
+  @apply w-full h-2 bg-secondary-200 rounded-lg appearance-none cursor-pointer;
+}
+
+.modern-range::-webkit-slider-thumb {
+  @apply appearance-none w-6 h-6 bg-gradient-to-r from-primary-500 to-primary-600 rounded-full cursor-pointer shadow-lg hover:shadow-xl transition-all duration-200;
+}
+
+/* Color Presets */
+.color-preset-modern {
+  @apply w-12 h-12 rounded-2xl cursor-pointer border-4 border-white shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-200 active:scale-95;
+}
+
+.color-preset-modern.active {
+  @apply ring-4 ring-primary-500/30 scale-110;
+}
+
+/* Zoom Controls */
+.zoom-btn {
+  @apply w-12 h-12 rounded-xl flex items-center justify-center text-secondary-600 hover:text-primary-600 hover:bg-primary-50 transition-all duration-200 active:scale-95 font-semibold;
+}
+
+/* Tool Sections */
+.tool-section {
+  @apply space-y-4;
+}
+
+.tool-section-header {
+  @apply flex items-center space-x-3 mb-6;
+}
+
+.tool-section-title {
+  @apply text-lg font-bold text-secondary-900 flex items-center space-x-3;
+}
+
+.tool-section-icon {
+  @apply w-10 h-10 rounded-xl flex items-center justify-center text-white text-lg shadow-lg;
+}
+
+.tools-grid {
+  @apply grid grid-cols-2 gap-3;
+}
+
+.tools-grid-single {
+  @apply grid grid-cols-1 gap-3;
+}
+
+/* Canvas Styles */
+#drawingCanvas {
+  cursor: crosshair;
+  touch-action: none;
+  border-radius: var(--radius-lg);
+}
+
+#drawingCanvas.select-mode {
+  cursor: default;
+}
+
+#drawingCanvas.text-mode {
+  cursor: text;
+}
+
+#drawingCanvas.erase-mode {
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="red" stroke-width="2"/><line x1="8" y1="8" x2="16" y2="16" stroke="red" stroke-width="2"/></svg>')
+    12 12, auto;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes bounceSubtle {
+  0%,
+  20%,
+  50%,
+  80%,
+  100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-4px);
+  }
+  60% {
+    transform: translateY(-2px);
+  }
+}
+
+@keyframes pulseSoft {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+/* Toast Styles */
+.toast {
+  @apply bg-white/90 backdrop-blur-xl border border-secondary-200/50 rounded-2xl shadow-2xl p-4 flex items-center space-x-3 transform transition-all duration-300 animate-slide-down;
+}
+
+.toast.success {
+  @apply border-green-200 bg-green-50/90;
+}
+
+.toast.error {
+  @apply border-red-200 bg-red-50/90;
+}
+
+.toast.warning {
+  @apply border-yellow-200 bg-yellow-50/90;
+}
+
+.toast.info {
+  @apply border-blue-200 bg-blue-50/90;
+}
+
+/* Loading States */
+.loading {
+  @apply opacity-50 pointer-events-none;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .tool-section {
+    @apply space-y-3;
+  }
+
+  .tools-grid {
+    @apply gap-2;
+  }
+
+  .tool-btn {
+    @apply p-3;
+  }
+
+  .tool-btn i {
+    @apply text-lg mb-1;
+  }
+}
+
+@media (max-width: 768px) {
+  .action-btn span {
+    @apply hidden;
+  }
+
+  .zoom-btn {
+    @apply w-10 h-10;
+  }
+
+  #propertiesPanel {
+    @apply w-full max-w-sm left-4 right-4;
+  }
+
+  .tools-grid {
+    @apply grid-cols-1 gap-2;
+  }
+}
+
+@media (max-width: 640px) {
+  .tool-section {
+    @apply space-y-2;
+  }
+
+  .mobile-tool-btn {
+    @apply w-11 h-11;
+  }
+
+  .category-btn {
+    @apply p-3;
+  }
+
+  .category-btn i {
+    @apply text-xl mb-2;
+  }
+}
+
+/* Focus States for Accessibility */
+button:focus-visible,
+input:focus-visible {
+  @apply outline-none ring-4 ring-primary-500/20;
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+  .tool-btn,
+  .category-btn,
+  .mobile-tool-btn {
+    @apply border-2 border-secondary-400;
+  }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Dark Mode Support (Future Enhancement) */
+@media (prefers-color-scheme: dark) {
+  /* Dark mode styles can be added here */
+}
+
+/* Print Styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}

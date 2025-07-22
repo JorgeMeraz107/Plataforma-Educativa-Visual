@@ -1402,7 +1402,6 @@ function makeCellEditable(cellObject) {
 }
 
 // Mejorar la función de selección de objetos para detectar tablas
-const originalHandleObjectSelection = handleObjectSelection
 function handleObjectSelection(e) {
   selectedElement = e.selected[0]
 
@@ -1410,7 +1409,7 @@ function handleObjectSelection(e) {
   if (selectedElement && selectedElement.tableData) {
     showTablePropertiesPanel()
   } else {
-    originalHandleObjectSelection(e)
+    showPropertiesPanel()
   }
 }
 
@@ -1610,11 +1609,6 @@ function updateColorPresets() {
 }
 
 // Manejar selección de objetos
-//function handleObjectSelection(e) {
-//  selectedElement = e.selected[0]
-//  showPropertiesPanel()
-//}
-
 // Limpiar selección de objetos
 function clearObjectSelection() {
   selectedElement = null

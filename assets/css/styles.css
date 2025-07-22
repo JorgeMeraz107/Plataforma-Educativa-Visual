@@ -344,14 +344,16 @@
   @apply opacity-50 pointer-events-none;
 }
 
-/* Responsive Design */
-@media (max-width: 1024px) {
-  .tool-section {
-    @apply space-y-3;
+/* IMPROVED RESPONSIVE DESIGN FOR DESKTOP */
+
+/* Small Desktop / Large Laptop (1024px - 1280px) */
+@media (min-width: 1024px) and (max-width: 1280px) {
+  #desktopSidebar {
+    @apply w-72;
   }
 
-  .tools-grid {
-    @apply gap-2;
+  .tool-section {
+    @apply space-y-3;
   }
 
   .tool-btn {
@@ -361,9 +363,226 @@
   .tool-btn i {
     @apply text-lg mb-1;
   }
+
+  .tool-btn span {
+    @apply text-xs;
+  }
+
+  .category-btn {
+    @apply p-3;
+  }
+
+  .category-btn i {
+    @apply text-xl mb-2;
+  }
+
+  .tools-grid {
+    @apply gap-2;
+  }
+
+  nav .flex {
+    @apply h-16;
+  }
+
+  .action-btn {
+    @apply px-3 py-2 text-xs;
+  }
+
+  .action-btn span {
+    @apply hidden xl:inline;
+  }
 }
 
-@media (max-width: 768px) {
+/* Medium Desktop (1280px - 1440px) */
+@media (min-width: 1280px) and (max-width: 1440px) {
+  #desktopSidebar {
+    @apply w-80;
+  }
+
+  .tool-section {
+    @apply space-y-4;
+  }
+
+  .tool-btn {
+    @apply p-4;
+  }
+
+  .category-btn {
+    @apply p-4;
+  }
+
+  .tools-grid {
+    @apply gap-3;
+  }
+
+  nav .flex {
+    @apply h-17;
+  }
+
+  .action-btn {
+    @apply px-4 py-2.5 text-sm;
+  }
+}
+
+/* Large Desktop (1440px - 1920px) */
+@media (min-width: 1440px) and (max-width: 1920px) {
+  #desktopSidebar {
+    @apply w-96;
+  }
+
+  .tool-section {
+    @apply space-y-5;
+  }
+
+  .tool-btn {
+    @apply p-5;
+  }
+
+  .tool-btn i {
+    @apply text-xl mb-2;
+  }
+
+  .tool-btn span {
+    @apply text-sm;
+  }
+
+  .category-btn {
+    @apply p-5;
+  }
+
+  .category-btn i {
+    @apply text-2xl mb-3;
+  }
+
+  .tools-grid {
+    @apply gap-4;
+  }
+
+  nav .flex {
+    @apply h-18;
+  }
+
+  .action-btn {
+    @apply px-5 py-3 text-sm;
+  }
+
+  #propertiesPanel {
+    @apply w-96;
+  }
+}
+
+/* Extra Large Desktop (1920px+) */
+@media (min-width: 1920px) {
+  #desktopSidebar {
+    @apply w-[28rem];
+  }
+
+  .tool-section {
+    @apply space-y-6;
+  }
+
+  .tool-btn {
+    @apply p-6;
+  }
+
+  .tool-btn i {
+    @apply text-2xl mb-3;
+  }
+
+  .tool-btn span {
+    @apply text-base;
+  }
+
+  .category-btn {
+    @apply p-6;
+  }
+
+  .category-btn i {
+    @apply text-3xl mb-4;
+  }
+
+  .tools-grid {
+    @apply gap-5;
+  }
+
+  nav .flex {
+    @apply h-20;
+  }
+
+  .action-btn {
+    @apply px-6 py-3 text-base;
+  }
+
+  #propertiesPanel {
+    @apply w-[28rem];
+  }
+
+  .zoom-btn {
+    @apply w-14 h-14;
+  }
+
+  .modern-input {
+    @apply px-5 py-4 text-base;
+  }
+}
+
+/* Ultra Wide Desktop (2560px+) */
+@media (min-width: 2560px) {
+  #desktopSidebar {
+    @apply w-[32rem];
+  }
+
+  .tool-section {
+    @apply space-y-8;
+  }
+
+  .tool-btn {
+    @apply p-8;
+  }
+
+  .tool-btn i {
+    @apply text-3xl mb-4;
+  }
+
+  .tool-btn span {
+    @apply text-lg;
+  }
+
+  .category-btn {
+    @apply p-8;
+  }
+
+  .category-btn i {
+    @apply text-4xl mb-5;
+  }
+
+  .tools-grid {
+    @apply gap-6;
+  }
+
+  nav .flex {
+    @apply h-24;
+  }
+
+  .action-btn {
+    @apply px-8 py-4 text-lg;
+  }
+
+  #propertiesPanel {
+    @apply w-[32rem];
+  }
+
+  .zoom-btn {
+    @apply w-16 h-16 text-lg;
+  }
+
+  .modern-input {
+    @apply px-6 py-5 text-lg;
+  }
+}
+
+/* Tablet Landscape Improvements */
+@media (min-width: 768px) and (max-width: 1024px) and (orientation: landscape) {
   .action-btn span {
     @apply hidden;
   }
@@ -381,6 +600,26 @@
   }
 }
 
+/* Mobile Landscape Improvements */
+@media (max-width: 768px) and (orientation: landscape) {
+  nav .flex {
+    @apply h-14;
+  }
+
+  #mobileToolbar {
+    @apply bottom-4 left-2 right-2 p-3;
+  }
+
+  .mobile-tool-btn {
+    @apply w-10 h-10;
+  }
+
+  .zoom-btn {
+    @apply w-9 h-9;
+  }
+}
+
+/* Mobile Portrait */
 @media (max-width: 640px) {
   .tool-section {
     @apply space-y-2;
@@ -396,6 +635,31 @@
 
   .category-btn i {
     @apply text-xl mb-2;
+  }
+
+  nav .flex {
+    @apply h-14;
+  }
+
+  .action-btn {
+    @apply px-2 py-2 text-xs;
+  }
+
+  .action-btn span {
+    @apply hidden;
+  }
+}
+
+/* High DPI Displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .tool-btn,
+  .category-btn,
+  .mobile-tool-btn {
+    @apply shadow-lg;
+  }
+
+  .action-btn {
+    @apply shadow-md;
   }
 }
 
@@ -435,4 +699,189 @@ input:focus-visible {
   .no-print {
     display: none !important;
   }
+}
+
+/* Estilos mejorados para tablas */
+.table-column-item {
+  @apply bg-white border border-gray-200 rounded-xl p-4 transition-all duration-200 hover:shadow-md;
+}
+
+.table-column-item:hover {
+  @apply border-orange-300 shadow-lg;
+}
+
+.table-preview-container {
+  @apply bg-gradient-to-br from-gray-50 to-orange-50/30 rounded-xl p-4 border border-gray-200;
+}
+
+.table-preview table {
+  @apply border-collapse border border-gray-300 rounded-lg overflow-hidden shadow-sm;
+}
+
+.table-preview th {
+  @apply bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold text-xs px-3 py-2 border-r border-orange-400 last:border-r-0;
+}
+
+.table-preview td {
+  @apply bg-white text-gray-700 text-xs px-3 py-2 border-r border-gray-200 last:border-r-0 border-b border-gray-200;
+}
+
+.table-preview tr:last-child td {
+  @apply border-b-0;
+}
+
+/* Indicadores de tipo de columna */
+.column-type-indicator {
+  @apply inline-flex items-center px-2 py-1 rounded-full text-xs font-medium;
+}
+
+.column-type-text {
+  @apply bg-blue-100 text-blue-800;
+}
+
+.column-type-number {
+  @apply bg-green-100 text-green-800;
+}
+
+.column-type-email {
+  @apply bg-purple-100 text-purple-800;
+}
+
+.column-type-date {
+  @apply bg-yellow-100 text-yellow-800;
+}
+
+.column-type-boolean {
+  @apply bg-gray-100 text-gray-800;
+}
+
+/* Animaciones para las tablas */
+.table-cell-editing {
+  @apply ring-2 ring-orange-500 ring-opacity-50 bg-orange-50;
+}
+
+.table-row-hover:hover {
+  @apply bg-orange-50 transition-colors duration-150;
+}
+
+/* Estilos para el modal de tabla mejorado */
+.table-modal-header {
+  @apply bg-gradient-to-r from-orange-500 to-orange-600 text-white p-6 rounded-t-2xl;
+}
+
+.table-modal-content {
+  @apply max-h-96 overflow-y-auto;
+}
+
+/* Responsive para el modal de tabla */
+@media (max-width: 768px) {
+  .table-modal-content {
+    @apply max-h-80;
+  }
+
+  .table-preview {
+    @apply text-xs;
+  }
+
+  .table-column-item {
+    @apply p-3;
+  }
+
+  .table-column-item .grid {
+    @apply grid-cols-1 gap-2;
+  }
+}
+
+/* Estilos para celdas editables */
+.fabric-text-editing {
+  @apply outline-none;
+}
+
+/* Indicadores visuales para tablas seleccionadas */
+.table-selected {
+  @apply ring-4 ring-orange-500 ring-opacity-30;
+}
+
+/* Estilos para el panel de propiedades de tabla */
+.table-properties-panel {
+  @apply bg-gradient-to-br from-orange-50 to-yellow-50 border-l-4 border-orange-500;
+}
+
+.table-action-btn {
+  @apply w-full py-3 px-4 rounded-xl font-semibold text-sm transition-all duration-200 flex items-center justify-center space-x-2 shadow-sm hover:shadow-md active:scale-95;
+}
+
+.table-action-btn.edit {
+  @apply bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700;
+}
+
+.table-action-btn.add {
+  @apply bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700;
+}
+
+.table-action-btn.duplicate {
+  @apply bg-gradient-to-r from-purple-500 to-purple-600 text-white hover:from-purple-600 hover:to-purple-700;
+}
+
+.table-action-btn.delete {
+  @apply bg-gradient-to-r from-red-500 to-red-600 text-white hover:from-red-600 hover:to-red-700;
+}
+
+/* Mejoras para la vista previa de tabla */
+.table-preview-header {
+  @apply bg-gradient-to-r from-orange-500 to-orange-600 text-white text-center py-2 px-4 font-bold rounded-t-lg;
+}
+
+.table-preview-body {
+  @apply bg-white rounded-b-lg overflow-hidden;
+}
+
+/* Estilos para columnas con clave primaria */
+.primary-key-column {
+  @apply bg-gradient-to-r from-yellow-100 to-yellow-200 border-yellow-300;
+}
+
+.primary-key-indicator {
+  @apply text-yellow-600 ml-1;
+}
+
+/* Animaciones suaves */
+@keyframes tableSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.table-slide-in {
+  animation: tableSlideIn 0.3s ease-out;
+}
+
+/* Estilos para diferentes tipos de datos */
+.data-type-badge {
+  @apply inline-flex items-center px-2 py-1 rounded-full text-xs font-medium;
+}
+
+.data-type-text {
+  @apply bg-blue-100 text-blue-800;
+}
+
+.data-type-number {
+  @apply bg-green-100 text-green-800;
+}
+
+.data-type-email {
+  @apply bg-purple-100 text-purple-800;
+}
+
+.data-type-date {
+  @apply bg-yellow-100 text-yellow-800;
+}
+
+.data-type-boolean {
+  @apply bg-gray-100 text-gray-800;
 }

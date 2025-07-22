@@ -7,14 +7,37 @@ let selectedElement = null
 let zoomLevel = 1
 const isMobile = window.innerWidth < 1024
 
-// Funciones para guardar y cargar el tablero
+// FUNCIONES MEJORADAS PARA GUARDAR Y CARGAR
 function saveBoard() {
   if (!canvas) return
 
   try {
     const canvasData = canvas.toJSON()
+
+    // Guardar en localStorage como respaldo
     localStorage.setItem("eduboard_canvas", JSON.stringify(canvasData))
-    showToast("Tablero guardado correctamente", "success")
+
+    // Crear y descargar archivo JSON
+    const dataStr = JSON.stringify(canvasData, null, 2)
+    const dataBlob = new Blob([dataStr], { type: "application/json" })
+
+    const link = document.createElement("a")
+    link.href = URL.createObjectURL(dataBlob)
+
+    // Generar nombre con fecha y hora
+    const now = new Date()
+    const timestamp = now.toISOString().slice(0, 19).replace(/[:.]/g, "-")
+    link.download = `pizarra-eduboard-${timestamp}.json`
+
+    // Simular click para descargar
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+
+    // Limpiar URL del blob
+    URL.revokeObjectURL(link.href)
+
+    showToast("Pizarra guardada y descargada correctamente", "success")
   } catch (error) {
     console.error("Error al guardar el tablero:", error)
     showToast("Error al guardar el tablero", "error")
@@ -24,19 +47,63 @@ function saveBoard() {
 function loadBoard() {
   if (!canvas) return
 
+  // Crear input file para cargar JSON
+  const input = document.createElement("input")
+  input.type = "file"
+  input.accept = ".json"
+
+  input.onchange = (event) => {
+    const file = event.target.files[0]
+    if (!file) return
+
+    showLoadingIndicator()
+
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      try {
+        const canvasData = JSON.parse(e.target.result)
+
+        canvas.loadFromJSON(canvasData, () => {
+          canvas.renderAll()
+          hideLoadingIndicator()
+          showToast("Pizarra cargada correctamente", "success")
+        })
+      } catch (error) {
+        console.error("Error al cargar el archivo:", error)
+        hideLoadingIndicator()
+        showToast("Error: Archivo JSON inválido", "error")
+      }
+    }
+
+    reader.onerror = () => {
+      hideLoadingIndicator()
+      showToast("Error al leer el archivo", "error")
+    }
+
+    reader.readAsText(file)
+  }
+
+  // Simular click para abrir selector de archivos
+  input.click()
+}
+
+// Función para cargar desde localStorage (como respaldo)
+function loadFromLocalStorage() {
+  if (!canvas) return
+
   try {
     const savedData = localStorage.getItem("eduboard_canvas")
     if (savedData) {
       canvas.loadFromJSON(JSON.parse(savedData), () => {
         canvas.renderAll()
-        showToast("Tablero cargado correctamente", "success")
+        showToast("Pizarra cargada desde respaldo local", "success")
       })
     } else {
-      showToast("No hay tablero guardado", "warning")
+      showToast("No hay pizarra guardada localmente", "warning")
     }
   } catch (error) {
-    console.error("Error al cargar el tablero:", error)
-    showToast("Error al cargar el tablero", "error")
+    console.error("Error al cargar desde localStorage:", error)
+    showToast("Error al cargar pizarra local", "error")
   }
 }
 
@@ -70,16 +137,20 @@ function initializeApp() {
   }
 }
 
-// Inicializar Canvas con Fabric.js
+// Inicializar Canvas con Fabric.js - MEJORADO PARA RESPONSIVE
 function initializeCanvas() {
   const canvasElement = document.getElementById("drawingCanvas")
   if (!canvasElement) {
     throw new Error("Elemento canvas no encontrado")
   }
 
-  // Calcular dimensiones del canvas
-  const containerWidth = window.innerWidth - (isMobile ? 0 : 288)
-  const containerHeight = window.innerHeight - (isMobile ? 136 : 64)
+  // Calcular dimensiones del canvas según el tamaño de pantalla
+  const sidebarWidth = getSidebarWidth()
+  const headerHeight = getHeaderHeight()
+  const mobileToolbarHeight = isMobile ? 136 : 0
+
+  const containerWidth = window.innerWidth - sidebarWidth
+  const containerHeight = window.innerHeight - headerHeight - mobileToolbarHeight
 
   canvas = new window.fabric.Canvas("drawingCanvas", {
     width: containerWidth,
@@ -104,6 +175,118 @@ function initializeCanvas() {
 
   // Redimensionar canvas cuando cambie el tamaño de ventana
   window.addEventListener("resize", debounce(resizeCanvas, 250))
+}
+
+// FUNCIONES AUXILIARES PARA RESPONSIVE DESIGN
+function getSidebarWidth() {
+  if (isMobile) return 0
+
+  const width = window.innerWidth
+  if (width >= 2560) return 512 // 32rem
+  if (width >= 1920) return 448 // 28rem
+  if (width >= 1440) return 384 // 24rem
+  if (width >= 1280) return 320 // 20rem
+  if (width >= 1024) return 288 // 18rem
+  return 288
+}
+
+function getHeaderHeight() {
+  const width = window.innerWidth
+  if (width >= 2560) return 96 // 24
+  if (width >= 1920) return 80 // 20
+  if (width >= 1440) return 72 // 18
+  if (width >= 1280) return 68 // 17
+  if (width < 768) return 56 // 14
+  return 64 // 16
+}
+
+// Mostrar modal de tabla
+function showTableModal() {
+  const modal = document.getElementById("tableModal")
+  if (modal) {
+    // Actualizar el contenido del modal con la nueva interfaz
+    const modalContent = modal.querySelector(".bg-white")
+    modalContent.innerHTML = `
+      <div class="flex items-center justify-between p-6 border-b border-gray-200">
+        <div class="flex items-center space-x-3">
+          <div class="w-12 h-12 bg-gradient-to-r from-orange-500 to-orange-600 rounded-2xl flex items-center justify-center">
+            <i class="fas fa-table text-white text-xl"></i>
+          </div>
+          <div>
+            <h3 class="text-xl font-bold text-gray-900">Crear Tabla de Base de Datos</h3>
+            <p class="text-sm text-gray-500">Diseña tu estructura de datos</p>
+          </div>
+        </div>
+        <button onclick="hideTableModal()" class="p-2 hover:bg-gray-100 rounded-xl transition-colors">
+          <i class="fas fa-times text-gray-500"></i>
+        </button>
+      </div>
+
+      <div class="p-6 space-y-6">
+        <!-- Información básica de la tabla -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="md:col-span-2">
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Nombre de la Tabla</label>
+            <input type="text" id="tableName" placeholder="ej: usuarios, productos, pedidos..." 
+                   class="modern-input" value="usuarios">
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Filas de Datos</label>
+            <input type="number" id="tableRows" min="1" max="10" value="3" class="modern-input">
+          </div>
+        </div>
+
+        <!-- Definición de columnas -->
+        <div>
+          <div class="flex items-center justify-between mb-4">
+            <label class="block text-sm font-semibold text-gray-700">Columnas de la Tabla</label>
+            <button onclick="addTableColumn()" class="btn-secondary text-sm py-2 px-3">
+              <i class="fas fa-plus mr-1"></i> Agregar Columna
+            </button>
+          </div>
+          
+          <div id="columnsContainer" class="space-y-3">
+            <!-- Las columnas se generarán dinámicamente -->
+          </div>
+        </div>
+
+        <!-- Vista previa -->
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-3">Vista Previa</label>
+          <div class="bg-gray-50 rounded-xl p-4 max-h-64 overflow-auto">
+            <div id="tablePreview" class="text-sm">
+              <!-- La vista previa se generará aquí -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex justify-end space-x-3 p-6 border-t border-gray-200 bg-gray-50">
+        <button onclick="hideTableModal()" class="btn-secondary">
+          <i class="fas fa-times mr-2"></i>Cancelar
+        </button>
+        <button onclick="createAdvancedTable()" class="btn-primary">
+          <i class="fas fa-plus mr-2"></i>Crear Tabla
+        </button>
+      </div>
+    `
+
+    // Inicializar columnas por defecto
+    initializeDefaultColumns()
+    updateTablePreview()
+
+    modal.classList.remove("hidden")
+    modal.classList.add("flex")
+  }
+}
+
+// Ocultar modal de tabla
+function hideTableModal() {
+  const modal = document.getElementById("tableModal")
+  if (modal) {
+    modal.classList.add("hidden")
+    modal.classList.remove("flex")
+  }
 }
 
 // Configurar event listeners
@@ -171,7 +354,7 @@ function setupEventListeners() {
   const createTableBtn = document.getElementById("createTable")
   const cancelTableBtn = document.getElementById("cancelTable")
 
-  if (createTableBtn) createTableBtn.addEventListener("click", createDatabaseTable)
+  if (createTableBtn) createTableBtn.addEventListener("click", createAdvancedTable)
   if (cancelTableBtn) cancelTableBtn.addEventListener("click", hideTableModal)
 
   // Properties panel
@@ -412,6 +595,25 @@ function populateToolSections() {
                 <span>Subir Imagen</span>
             </button>
         </div>
+
+        <!-- Opciones de Archivo -->
+        <div class="tool-section">
+            <div class="tool-section-header">
+                <div class="tool-section-icon bg-gradient-to-r from-blue-500 to-blue-600">
+                    <i class="fas fa-file"></i>
+                </div>
+                <div>
+                    <h3 class="tool-section-title">Archivo</h3>
+                    <p class="text-sm text-secondary-500">Gestión de pizarras</p>
+                </div>
+            </div>
+            <div class="space-y-3">
+                <button onclick="loadFromLocalStorage()" class="w-full bg-gradient-to-r from-gray-500 to-gray-600 text-white py-3 px-4 rounded-xl hover:from-gray-600 hover:to-gray-700 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl active:scale-95 flex items-center justify-center space-x-2">
+                    <i class="fas fa-history"></i>
+                    <span>Cargar Respaldo Local</span>
+                </button>
+            </div>
+        </div>
     `
 
   // Re-attach event listeners for dynamically created elements
@@ -440,7 +642,7 @@ function attachToolEventListeners() {
   }
 
   // Color presets
-  document.querySelectorAll(".color-preset").forEach((preset) => {
+  document.querySelectorAll(".color-preset-modern").forEach((preset) => {
     preset.addEventListener("click", function () {
       currentColor = this.dataset.color
       const colorPicker = document.getElementById("colorPicker")
@@ -812,66 +1014,275 @@ function addWebElement(elementType) {
   saveCanvasState()
 }
 
-// Mostrar modal de tabla
-function showTableModal() {
-  const modal = document.getElementById("tableModal")
-  if (modal) {
-    modal.classList.remove("hidden")
-    modal.classList.add("flex")
+// Funciones auxiliares que faltaban
+function addTableColumn() {
+  const container = document.getElementById("columnsContainer")
+  if (!container) return
+
+  const columnCount = container.children.length
+  addColumnToContainer(`campo${columnCount + 1}`, "text", false, columnCount)
+  updateTablePreview()
+}
+
+function removeTableColumn(button) {
+  const container = document.getElementById("columnsContainer")
+  if (container && container.children.length > 1) {
+    button.closest(".bg-white").remove()
+    updateTablePreview()
+  } else {
+    showToast("Debe haber al menos una columna", "warning")
   }
 }
 
-// Ocultar modal de tabla
-function hideTableModal() {
-  const modal = document.getElementById("tableModal")
-  if (modal) {
-    modal.classList.add("hidden")
-    modal.classList.remove("flex")
-  }
+function updateTablePreview() {
+  const preview = document.getElementById("tablePreview")
+  const container = document.getElementById("columnsContainer")
+  const tableName = document.getElementById("tableName")?.value || "tabla"
+
+  if (!preview || !container) return
+
+  const columns = []
+  Array.from(container.children).forEach((columnDiv) => {
+    const inputs = columnDiv.querySelectorAll("input, select")
+    const name = inputs[0].value
+    const type = inputs[1].value
+    const primaryKey = inputs[2].checked
+
+    columns.push({ name, type, primaryKey })
+  })
+
+  const html = `
+    <div class="inline-block border border-gray-300 rounded-lg overflow-hidden">
+      <div class="bg-orange-500 text-white px-4 py-2 font-bold text-center">
+        ${tableName.toUpperCase()}
+      </div>
+      <table class="min-w-full">
+        <thead class="bg-gray-100">
+          <tr>
+            ${columns
+              .map(
+                (col) => `
+              <th class="px-3 py-2 text-left text-xs font-semibold text-gray-700 border-r border-gray-300 last:border-r-0">
+                ${col.name}
+                ${col.primaryKey ? '<i class="fas fa-key text-yellow-500 ml-1"></i>' : ""}
+                <div class="text-xs font-normal text-gray-500">${getTypeLabel(col.type)}</div>
+              </th>
+            `,
+              )
+              .join("")}
+          </tr>
+        </thead>
+        <tbody>
+          ${Array.from(
+            { length: 2 },
+            (_, i) => `
+            <tr class="border-t border-gray-200">
+              ${columns
+                .map(
+                  (col) => `
+                <td class="px-3 py-2 text-xs text-gray-600 border-r border-gray-300 last:border-r-0">
+                  ${getSampleData(col.type, i)}
+                </td>
+              `,
+                )
+                .join("")}
+            </tr>
+          `,
+          ).join("")}
+        </tbody>
+      </table>
+    </div>
+  `
+
+  preview.innerHTML = html
 }
 
-// Crear tabla de base de datos
-function createDatabaseTable() {
+function initializeDefaultColumns() {
+  const container = document.getElementById("columnsContainer")
+  if (!container) return
+
+  container.innerHTML = ""
+
+  // Columnas por defecto
+  const defaultColumns = [
+    { name: "id", type: "number", primaryKey: true },
+    { name: "nombre", type: "text", primaryKey: false },
+    { name: "email", type: "text", primaryKey: false },
+  ]
+
+  defaultColumns.forEach((col, index) => {
+    addColumnToContainer(col.name, col.type, col.primaryKey, index)
+  })
+}
+
+function addColumnToContainer(name, type, primaryKey, index) {
+  const container = document.getElementById("columnsContainer")
+  if (!container) return
+
+  const columnDiv = document.createElement("div")
+  columnDiv.className = "bg-white border border-gray-200 rounded-xl p-4"
+  columnDiv.innerHTML = `
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
+      <div>
+        <label class="block text-xs font-medium text-gray-600 mb-1">Nombre</label>
+        <input type="text" value="${name}" onchange="updateTablePreview()" 
+               class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-600 mb-1">Tipo</label>
+        <select onchange="updateTablePreview()" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+          <option value="text" ${type === "text" ? "selected" : ""}>Texto</option>
+          <option value="number" ${type === "number" ? "selected" : ""}>Número</option>
+          <option value="email" ${type === "email" ? "selected" : ""}>Email</option>
+          <option value="date" ${type === "date" ? "selected" : ""}>Fecha</option>
+          <option value="boolean" ${type === "boolean" ? "selected" : ""}>Booleano</option>
+        </select>
+      </div>
+      <div>
+        <label class="flex items-center space-x-2 text-xs font-medium text-gray-600">
+          <input type="checkbox" ${primaryKey ? "checked" : ""} onchange="updateTablePreview()" 
+                 class="rounded border-gray-300 text-orange-600 focus:ring-orange-500">
+          <span>Clave Primaria</span>
+        </label>
+      </div>
+      <div>
+        <button onclick="removeTableColumn(this)" class="w-full bg-red-100 text-red-600 py-2 px-3 rounded-lg hover:bg-red-200 transition-colors text-sm font-medium">
+          <i class="fas fa-trash"></i>
+        </button>
+      </div>
+    </div>
+  `
+
+  container.appendChild(columnDiv)
+}
+
+function getTypeLabel(type) {
+  const labels = {
+    text: "Texto",
+    number: "Número",
+    email: "Email",
+    date: "Fecha",
+    boolean: "Sí/No",
+  }
+  return labels[type] || "Texto"
+}
+
+function getSampleData(type, index) {
+  const samples = {
+    text: ["Juan Pérez", "María García"],
+    number: ["1", "2"],
+    email: ["juan@email.com", "maria@email.com"],
+    date: ["2024-01-15", "2024-01-16"],
+    boolean: ["Sí", "No"],
+  }
+  return samples[type] ? samples[type][index] || samples[type][0] : "Dato"
+}
+
+// Reemplazar la función createDatabaseTable() con esta versión avanzada:
+function createAdvancedTable() {
   if (!canvas) return
 
   const tableName = document.getElementById("tableName")?.value || "tabla"
   const rows = Number.parseInt(document.getElementById("tableRows")?.value) || 3
-  const cols = Number.parseInt(document.getElementById("tableCols")?.value) || 3
+  const container = document.getElementById("columnsContainer")
+
+  if (!container) return
+
+  // Obtener definición de columnas
+  const columns = []
+  Array.from(container.children).forEach((columnDiv) => {
+    const inputs = columnDiv.querySelectorAll("input, select")
+    const name = inputs[0].value
+    const type = inputs[1].value
+    const primaryKey = inputs[2].checked
+
+    columns.push({ name, type, primaryKey })
+  })
+
+  if (columns.length === 0) {
+    showToast("Debe definir al menos una columna", "warning")
+    return
+  }
 
   const centerX = canvas.width / 2
   const centerY = canvas.height / 2
-  const cellWidth = 80
-  const cellHeight = 25
+  const cellWidth = Math.max(80, Math.min(120, 800 / columns.length))
+  const cellHeight = 30
 
   const elements = []
 
-  // Crear header
-  const header = new window.fabric.Rect({
-    width: cellWidth * cols,
+  // Crear header de la tabla
+  const headerBg = new fabric.Rect({
+    width: cellWidth * columns.length,
     height: cellHeight,
     fill: "#f59e0b",
     stroke: "#d97706",
     strokeWidth: 1,
   })
 
-  const headerText = new window.fabric.Text(tableName.toUpperCase(), {
-    left: (cellWidth * cols) / 2,
+  const headerText = new fabric.Text(tableName.toUpperCase(), {
+    left: (cellWidth * columns.length) / 2,
     top: cellHeight / 2,
     originX: "center",
     originY: "center",
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: "bold",
     fill: "white",
   })
 
-  elements.push(header, headerText)
+  elements.push(headerBg, headerText)
 
-  // Crear filas
-  for (let i = 0; i < rows; i++) {
-    for (let j = 0; j < cols; j++) {
-      const cell = new window.fabric.Rect({
-        left: j * cellWidth,
-        top: (i + 1) * cellHeight,
+  // Crear headers de columnas
+  columns.forEach((col, colIndex) => {
+    const colHeaderBg = new fabric.Rect({
+      left: colIndex * cellWidth,
+      top: cellHeight,
+      width: cellWidth,
+      height: cellHeight,
+      fill: col.primaryKey ? "#fef3c7" : "#f3f4f6",
+      stroke: "#d1d5db",
+      strokeWidth: 1,
+    })
+
+    const colHeaderText = new fabric.Text(col.name, {
+      left: colIndex * cellWidth + cellWidth / 2,
+      top: cellHeight + cellHeight / 2,
+      originX: "center",
+      originY: "center",
+      fontSize: 11,
+      fontWeight: "bold",
+      fill: col.primaryKey ? "#92400e" : "#374151",
+    })
+
+    // Agregar icono de clave primaria
+    if (col.primaryKey) {
+      const keyIcon = new fabric.Text("🔑", {
+        left: colIndex * cellWidth + cellWidth - 15,
+        top: cellHeight + 8,
+        fontSize: 12,
+      })
+      elements.push(keyIcon)
+    }
+
+    // Agregar indicador de tipo
+    const typeText = new fabric.Text(getTypeLabel(col.type), {
+      left: colIndex * cellWidth + cellWidth / 2,
+      top: cellHeight + cellHeight - 8,
+      originX: "center",
+      originY: "center",
+      fontSize: 8,
+      fill: "#6b7280",
+    })
+
+    elements.push(colHeaderBg, colHeaderText, typeText)
+  })
+
+  // Crear filas de datos
+  for (let rowIndex = 0; rowIndex < rows; rowIndex++) {
+    columns.forEach((col, colIndex) => {
+      const cellBg = new fabric.Rect({
+        left: colIndex * cellWidth,
+        top: (rowIndex + 2) * cellHeight,
         width: cellWidth,
         height: cellHeight,
         fill: "white",
@@ -879,28 +1290,231 @@ function createDatabaseTable() {
         strokeWidth: 1,
       })
 
-      const cellText = new window.fabric.Text(`campo${j + 1}`, {
-        left: j * cellWidth + cellWidth / 2,
-        top: (i + 1) * cellHeight + cellHeight / 2,
+      const sampleData = getSampleData(col.type, rowIndex)
+      const cellText = new fabric.IText(sampleData, {
+        left: colIndex * cellWidth + cellWidth / 2,
+        top: (rowIndex + 2) * cellHeight + cellHeight / 2,
         originX: "center",
         originY: "center",
         fontSize: 10,
         fill: "#374151",
+        editable: true,
+        selectable: true,
       })
 
-      elements.push(cell, cellText)
-    }
+      // Hacer la celda editable al doble clic
+      cellText.on("editing:entered", function () {
+        this.selectAll()
+      })
+
+      elements.push(cellBg, cellText)
+    })
   }
 
-  const table = new window.fabric.Group(elements, {
-    left: centerX - (cellWidth * cols) / 2,
-    top: centerY - ((rows + 1) * cellHeight) / 2,
+  // Crear el grupo de la tabla
+  const table = new fabric.Group(elements, {
+    left: centerX - (cellWidth * columns.length) / 2,
+    top: centerY - ((rows + 2) * cellHeight) / 2,
+    selectable: true,
+  })
+
+  // Agregar metadatos a la tabla para futuras ediciones
+  table.set("tableData", {
+    name: tableName,
+    columns: columns,
+    rows: rows,
+    cellWidth: cellWidth,
+    cellHeight: cellHeight,
   })
 
   canvas.add(table)
   canvas.setActiveObject(table)
   saveCanvasState()
   hideTableModal()
+
+  showToast(`Tabla "${tableName}" creada con ${columns.length} columnas y ${rows} filas`, "success")
+}
+
+// Agregar función para editar tabla existente
+function editTable(tableObject) {
+  if (!tableObject || !tableObject.tableData) {
+    showToast("Esta tabla no se puede editar", "warning")
+    return
+  }
+
+  const tableData = tableObject.tableData
+
+  // Rellenar el modal con los datos existentes
+  document.getElementById("tableName").value = tableData.name
+  document.getElementById("tableRows").value = tableData.rows
+
+  // Recrear las columnas
+  const container = document.getElementById("columnsContainer")
+  container.innerHTML = ""
+
+  tableData.columns.forEach((col, index) => {
+    addColumnToContainer(col.name, col.type, col.primaryKey, index)
+  })
+
+  updateTablePreview()
+  showTableModal()
+
+  // Cambiar el botón de crear por actualizar
+  const createBtn = document.querySelector('[onclick="createAdvancedTable()"]')
+  if (createBtn) {
+    createBtn.innerHTML = '<i class="fas fa-save mr-2"></i>Actualizar Tabla'
+    createBtn.setAttribute("onclick", `updateExistingTable('${tableObject.id}')`)
+  }
+}
+
+// Función para actualizar tabla existente
+function updateExistingTable(tableId) {
+  const tableObject = canvas.getObjects().find((obj) => obj.id === tableId)
+  if (!tableObject) return
+
+  // Eliminar tabla anterior
+  canvas.remove(tableObject)
+
+  // Crear nueva tabla con los datos actualizados
+  createAdvancedTable()
+}
+
+// Agregar función para hacer celdas editables individualmente
+function makeCellEditable(cellObject) {
+  if (!cellObject || cellObject.type !== "i-text") return
+
+  cellObject.set({
+    editable: true,
+    selectable: true,
+  })
+
+  cellObject.on("editing:entered", function () {
+    this.selectAll()
+    showToast("Editando celda - Presiona Escape para terminar", "info", 2000)
+  })
+
+  cellObject.on("editing:exited", () => {
+    saveCanvasState()
+    showToast("Celda actualizada", "success", 1500)
+  })
+
+  canvas.renderAll()
+}
+
+// Mejorar la función de selección de objetos para detectar tablas
+const originalHandleObjectSelection = handleObjectSelection
+function handleObjectSelection(e) {
+  selectedElement = e.selected[0]
+
+  // Si es una tabla, mostrar opciones especiales
+  if (selectedElement && selectedElement.tableData) {
+    showTablePropertiesPanel()
+  } else {
+    originalHandleObjectSelection(e)
+  }
+}
+
+// Panel de propiedades especial para tablas
+function showTablePropertiesPanel() {
+  const panel = document.getElementById("propertiesPanel")
+  const content = document.getElementById("propertiesContent")
+
+  if (!selectedElement || !panel || !content) return
+
+  const tableData = selectedElement.tableData
+
+  const html = `
+    <div class="space-y-4">
+      <div class="bg-orange-50 border border-orange-200 rounded-lg p-3">
+        <div class="flex items-center space-x-2 mb-2">
+          <i class="fas fa-table text-orange-600"></i>
+          <span class="font-semibold text-orange-800">Tabla: ${tableData.name}</span>
+        </div>
+        <div class="text-sm text-orange-700">
+          ${tableData.columns.length} columnas • ${tableData.rows} filas
+        </div>
+      </div>
+      
+      <div class="space-y-3">
+        <button onclick="editTable(selectedElement)" class="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors font-medium">
+          <i class="fas fa-edit mr-2"></i>
+          Editar Estructura
+        </button>
+        
+        <button onclick="addTableRow()" class="w-full bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 transition-colors font-medium">
+          <i class="fas fa-plus mr-2"></i>
+          Agregar Fila
+        </button>
+        
+        <button onclick="duplicateTable()" class="w-full bg-purple-500 text-white py-2 px-4 rounded-lg hover:bg-purple-600 transition-colors font-medium">
+          <i class="fas fa-copy mr-2"></i>
+          Duplicar Tabla
+        </button>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Opacidad</label>
+          <input type="range" id="tableOpacity" min="0" max="1" step="0.1" value="${selectedElement.opacity}" class="w-full">
+        </div>
+        
+        <button onclick="deleteTable()" class="w-full bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 transition-colors font-medium">
+          <i class="fas fa-trash mr-2"></i>
+          Eliminar Tabla
+        </button>
+      </div>
+    </div>
+  `
+
+  content.innerHTML = html
+  panel.classList.remove("hidden")
+
+  // Configurar control de opacidad
+  const opacityControl = document.getElementById("tableOpacity")
+  if (opacityControl) {
+    opacityControl.addEventListener("input", function () {
+      selectedElement.set("opacity", Number.parseFloat(this.value))
+      canvas.renderAll()
+    })
+  }
+}
+
+// Funciones adicionales para manejo de tablas
+function addTableRow() {
+  if (!selectedElement || !selectedElement.tableData) return
+
+  showToast("Función en desarrollo - Próximamente podrás agregar filas dinámicamente", "info")
+}
+
+function duplicateTable() {
+  if (!selectedElement) return
+
+  const cloned = fabric.util.object.clone(selectedElement)
+  cloned.set({
+    left: selectedElement.left + 20,
+    top: selectedElement.top + 20,
+  })
+
+  canvas.add(cloned)
+  canvas.setActiveObject(cloned)
+  saveCanvasState()
+  showToast("Tabla duplicada", "success")
+}
+
+function deleteTable() {
+  if (!selectedElement) return
+
+  showConfirmModal({
+    title: "¿Eliminar tabla?",
+    message: `Se eliminará la tabla "${selectedElement.tableData?.name || "seleccionada"}" permanentemente.`,
+    icon: "fas fa-trash-alt",
+    iconColor: "bg-gradient-to-r from-red-500 to-red-600",
+    confirmText: "Sí, eliminar",
+    onConfirm: () => {
+      canvas.remove(selectedElement)
+      hidePropertiesPanel()
+      saveCanvasState()
+      showToast("Tabla eliminada", "success")
+    },
+  })
 }
 
 // Manejar carga de imágenes
@@ -987,7 +1601,7 @@ function updateBrushColor() {
 
 // Actualizar presets de color
 function updateColorPresets() {
-  document.querySelectorAll(".color-preset").forEach((preset) => {
+  document.querySelectorAll(".color-preset-modern").forEach((preset) => {
     preset.classList.remove("active")
     if (preset.dataset.color === currentColor) {
       preset.classList.add("active")
@@ -996,10 +1610,10 @@ function updateColorPresets() {
 }
 
 // Manejar selección de objetos
-function handleObjectSelection(e) {
-  selectedElement = e.selected[0]
-  showPropertiesPanel()
-}
+//function handleObjectSelection(e) {
+//  selectedElement = e.selected[0]
+//  showPropertiesPanel()
+//}
 
 // Limpiar selección de objetos
 function clearObjectSelection() {
@@ -1159,12 +1773,16 @@ function updateZoomDisplay() {
   }
 }
 
-// Redimensionar canvas
+// FUNCIÓN MEJORADA PARA REDIMENSIONAR CANVAS
 function resizeCanvas() {
   if (!canvas) return
 
-  const containerWidth = window.innerWidth - (isMobile ? 0 : 288)
-  const containerHeight = window.innerHeight - (isMobile ? 136 : 64)
+  const sidebarWidth = getSidebarWidth()
+  const headerHeight = getHeaderHeight()
+  const mobileToolbarHeight = isMobile ? 136 : 0
+
+  const containerWidth = window.innerWidth - sidebarWidth
+  const containerHeight = window.innerHeight - headerHeight - mobileToolbarHeight
 
   canvas.setDimensions({
     width: containerWidth,
@@ -1241,7 +1859,10 @@ function newBoard() {
     iconColor: "bg-gradient-to-r from-primary-500 to-primary-600",
     confirmText: "Crear nueva",
     onConfirm: () => {
-      clearCanvas()
+      canvas.clear()
+      canvas.backgroundColor = "white"
+      canvas.renderAll()
+      saveCanvasState()
       showToast("Nueva pizarra creada", "success")
     },
   })
@@ -1422,7 +2043,11 @@ window.addDatabaseElement = addDatabaseElement
 window.addWebElement = addWebElement
 window.showTableModal = showTableModal
 window.hideTableModal = hideTableModal
+window.addTableColumn = addTableColumn
+window.removeTableColumn = removeTableColumn
+window.updateTablePreview = updateTablePreview
 window.showConfirmModal = showConfirmModal
 window.showToast = showToast
 window.saveBoard = saveBoard
 window.loadBoard = loadBoard
+window.loadFromLocalStorage = loadFromLocalStorage
